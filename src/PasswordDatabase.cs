@@ -1,5 +1,6 @@
 namespace PassBob;
 
+using System.Diagnostics;
 using System.Text;
 using SQLite;
 
@@ -39,17 +40,22 @@ public class PasswordDatabase {
 		if (MasterKeyBytes is null) throw new InvalidDataException("Can't Update Master Password when you are not logged in");
 
 		List<Password> passwords = await GetPasswordsAsync();
-		byte[] newMasterKeyBytes = Encoding.UTF8.GetBytes(newMasterKey);
-
-		foreach (Password password in passwords) {
-			// Decrypt with the old master password
-			string decryptedPassword = EncryptionHelper.Decrypt(password.EncryptedPassword, MasterKeyBytes);
-
-			// Encrypt with the new master password
-			password.EncryptedPassword = EncryptionHelper.Encrypt(decryptedPassword, newMasterKeyBytes);
-		}
+		// byte[] newMasterKeyBytes = Encoding.UTF8.GetBytes(newMasterKey);
 
 		MasterKey = newMasterKey;
+
+		foreach (Password password in passwords) {
+			// // Decrypt with the old master password
+			// string decryptedPassword = EncryptionHelper.Decrypt(password.EncryptedPassword, MasterKeyBytes);
+			// Debug.WriteLine(decryptedPassword);
+
+			// // Encrypt with the new master password
+			// password.EncryptedPassword = EncryptionHelper.Encrypt(decryptedPassword, newMasterKeyBytes);
+			// Debug.WriteLine(password.EncryptedPassword);
+			// Debug.WriteLine(password.DecryptedPassword);
+			password.DecryptedPassword = password.DecryptedPassword;
+		}
+
 
 		// Save the updated passwords
 		foreach (Password password in passwords) {

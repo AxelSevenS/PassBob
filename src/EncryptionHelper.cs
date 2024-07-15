@@ -1,21 +1,36 @@
 namespace PassBob;
-
 using System.Security.Cryptography;
+using System.IO;
+using System;
 
 public class EncryptionHelper {
+	private const int KeySize = 32; // 256 bits
+	private const int Iterations = 10000;
+
+	private static byte[] DeriveKey(byte[] masterKeyBytes, byte[] salt) {
+		using Rfc2898DeriveBytes keyDerivationFunction = new(masterKeyBytes, salt, Iterations, HashAlgorithmName.SHA256);
+		return keyDerivationFunction.GetBytes(KeySize);
+	}
+
 	public static string Encrypt(string text, byte[] masterKeyBytes) {
 		if (masterKeyBytes is null) {
 			throw new InvalidDataException("Cannot Encrypt or Decrypt while not Authenticated");
 		}
 
 		using Aes aesAlg = Aes.Create();
-		aesAlg.Key = SHA256.HashData(masterKeyBytes);
 		aesAlg.GenerateIV();
 		byte[] iv = aesAlg.IV;
+		byte[] salt = new byte[16];
+		using (RandomNumberGenerator rng = RandomNumberGenerator.Create()) {
+			rng.GetBytes(salt);
+		}
+
+		aesAlg.Key = DeriveKey(masterKeyBytes, salt);
 		ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, iv);
 
 		using MemoryStream msEncrypt = new();
 		msEncrypt.Write(iv, 0, iv.Length);
+		msEncrypt.Write(salt, 0, salt.Length);
 		using (CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write)) {
 			using StreamWriter swEncrypt = new(csEncrypt);
 			swEncrypt.Write(text);
@@ -33,12 +48,14 @@ public class EncryptionHelper {
 
 		using Aes aesAlg = Aes.Create();
 		byte[] iv = new byte[aesAlg.BlockSize / 8];
-		byte[] cipher = new byte[fullCipher.Length - iv.Length];
+		byte[] salt = new byte[16];
+		byte[] cipher = new byte[fullCipher.Length - iv.Length - salt.Length];
 
 		Array.Copy(fullCipher, iv, iv.Length);
-		Array.Copy(fullCipher, iv.Length, cipher, 0, cipher.Length);
+		Array.Copy(fullCipher, iv.Length, salt, 0, salt.Length);
+		Array.Copy(fullCipher, iv.Length + salt.Length, cipher, 0, cipher.Length);
 
-		aesAlg.Key = SHA256.HashData(masterKeyBytes);
+		aesAlg.Key = DeriveKey(masterKeyBytes, salt);
 		aesAlg.IV = iv;
 		ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
