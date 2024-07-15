@@ -5,10 +5,6 @@ using Microsoft.Extensions.Logging;
 namespace PassBob;
 
 public static class MauiProgram {
-	public static readonly IConfigurationRoot Configuration = new ConfigurationBuilder()
-		.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-		.Build();
-
 	public static MauiApp CreateMauiApp() {
 		var builder = MauiApp.CreateBuilder();
 		builder

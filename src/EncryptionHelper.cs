@@ -1,14 +1,15 @@
-using System.Security.Cryptography;
-using System.Text;
-
 namespace PassBob;
 
-public static class EncryptionHelper {
-	private static readonly byte[] Key = Encoding.UTF8.GetBytes(MauiProgram.Configuration["Encryption:Key"]);
+using System.Security.Cryptography;
 
-	public static string Encrypt(string text) {
+public class EncryptionHelper {
+	public static string Encrypt(string text, byte[] masterKeyBytes) {
+		if (masterKeyBytes is null) {
+			throw new InvalidDataException("Cannot Encrypt or Decrypt while not Authenticated");
+		}
+
 		using Aes aesAlg = Aes.Create();
-		aesAlg.Key = Key;
+		aesAlg.Key = SHA256.HashData(masterKeyBytes);
 		aesAlg.GenerateIV();
 		byte[] iv = aesAlg.IV;
 		ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, iv);
@@ -23,17 +24,21 @@ public static class EncryptionHelper {
 		return Convert.ToBase64String(msEncrypt.ToArray());
 	}
 
-	public static string Decrypt(string cipherText) {
+	public static string Decrypt(string cipherText, byte[] masterKeyBytes) {
+		if (masterKeyBytes is null) {
+			throw new InvalidDataException("Cannot Encrypt or Decrypt while not Authenticated");
+		}
+
 		byte[] fullCipher = Convert.FromBase64String(cipherText);
 
-		using Aes? aesAlg = Aes.Create();
+		using Aes aesAlg = Aes.Create();
 		byte[] iv = new byte[aesAlg.BlockSize / 8];
 		byte[] cipher = new byte[fullCipher.Length - iv.Length];
 
 		Array.Copy(fullCipher, iv, iv.Length);
 		Array.Copy(fullCipher, iv.Length, cipher, 0, cipher.Length);
 
-		aesAlg.Key = Key;
+		aesAlg.Key = SHA256.HashData(masterKeyBytes);
 		aesAlg.IV = iv;
 		ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 

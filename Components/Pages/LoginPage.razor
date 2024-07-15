@@ -1,0 +1,47 @@
+@page "/login"
+@inject NavigationManager Navigation
+
+<h3>Connexion</h3>
+
+@if (masterKey is not null) {
+	<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<div>
+			<label for="masterKey">Master Key:</label>
+			<InputText id="masterKey" @bind-Value="loginModel.MasterKey" type="password" />
+		</div>
+		<button type="submit">Se Connecter</button>
+	</EditForm>
+}
+else {
+	<EditForm Model="@loginModel" OnValidSubmit="HandleSignup">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<div>
+			<label for="masterKey">Master Key:</label>
+			<InputText id="masterKey" @bind-Value="loginModel.MasterKey" type="password" />
+		</div>
+		<button type="submit">Créer Master Key</button>
+	</EditForm>
+}
+
+@code {
+    private LoginModel loginModel = new();
+	private string? masterKey;
+
+    protected override async Task OnInitializedAsync() {
+        masterKey = await SecureStorageService.GetEncryptedMasterKeyAsync();
+    }
+
+    private async Task HandleLogin() {
+		if (await PasswordDatabase.TryLoginAsync(loginModel.MasterKey)) {
+			Navigation.NavigateTo("/list");
+		}
+    }
+
+    private void HandleSignup() {
+        PasswordDatabase.SetMasterKeyDestructive(loginModel.MasterKey);
+        Navigation.NavigateTo("/list");
+    }
+}
