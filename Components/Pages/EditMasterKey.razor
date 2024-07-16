@@ -2,18 +2,18 @@
 @inject NavigationManager Navigation
 
 <h3>Modifier la Master Key</h3>
-<EditForm Model="@loginModel" OnValidSubmit="HandleModifyKey">
+<EditForm Model="@editKeyModel" OnValidSubmit="HandleModifyKey">
 	<DataAnnotationsValidator />
 	<ValidationSummary />
 	<div>
 		<label for="masterKey">Master Key:</label>
-		<InputText id="masterKey" @bind-Value="loginModel.MasterKey" type="password" />
+		<InputText id="masterKey" @bind-Value="editKeyModel.MasterKey" type="password" />
 	</div>
 	<button type="submit">Modifier</button>
 </EditForm>
 
 @code {
-	private LoginModel loginModel = new();
+	private LoginModel editKeyModel = new();
 
 	protected override async Task OnInitializedAsync() {
 		string? masterKey = PasswordDatabase.MasterKey;
@@ -24,7 +24,7 @@
 	}
 
 	private async Task HandleModifyKey() {
-		await PasswordDatabase.UpdateMasterKey(loginModel.MasterKey);
+		await PasswordDatabase.UpdateMasterKey(editKeyModel.MasterKey);
 		Navigation.NavigateTo("/");
 	}
 }

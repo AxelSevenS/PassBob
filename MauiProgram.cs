@@ -1,14 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using DotNet.Meteor.HotReload.Plugin;
 using Microsoft.Extensions.Logging;
 
 namespace PassBob;
 
 public static class MauiProgram {
 	public static MauiApp CreateMauiApp() {
-		var builder = MauiApp.CreateBuilder();
+		MauiAppBuilder builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+#if DEBUG
+			.EnableHotReload()
+#endif
 			.ConfigureFonts(fonts => {
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 			});

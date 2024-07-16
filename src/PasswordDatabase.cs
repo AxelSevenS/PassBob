@@ -40,12 +40,10 @@ public class PasswordDatabase {
 		if (MasterKeyBytes is null) throw new InvalidDataException("Can't Update Master Password when you are not logged in");
 
 		List<Password> passwords = await GetPasswordsAsync();
-		// byte[] newMasterKeyBytes = Encoding.UTF8.GetBytes(newMasterKey);
 
 		MasterKey = newMasterKey;
 
 		foreach (Password password in passwords) {
-			// Debug.WriteLine(password.DecryptedPassword);
 			password.DecryptedPassword = password.DecryptedPassword; // Use the Setter to encrypt
 		}
 
@@ -88,4 +86,10 @@ public class PasswordDatabase {
 	public static Task<int> DeletePasswordAsync(Password password) {
 		return _database.DeleteAsync(password);
 	}
+
+	public static Task<int> ModifyPasswordAsync(Password password) {
+		return _database.UpdateAsync(password);
+	}
+
+
 }
