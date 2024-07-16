@@ -39,29 +39,37 @@ public class EncryptionHelper {
 		return Convert.ToBase64String(msEncrypt.ToArray());
 	}
 
-	public static string Decrypt(string cipherText, byte[] masterKeyBytes) {
+	public static bool TryDecrypt(string cipherText, byte[] masterKeyBytes, out string decrypted) {
 		if (masterKeyBytes is null) {
 			throw new InvalidDataException("Cannot Encrypt or Decrypt while not Authenticated");
 		}
 
-		byte[] fullCipher = Convert.FromBase64String(cipherText);
+		try {
+			byte[] fullCipher = Convert.FromBase64String(cipherText);
 
-		using Aes aesAlg = Aes.Create();
-		byte[] iv = new byte[aesAlg.BlockSize / 8];
-		byte[] salt = new byte[16];
-		byte[] cipher = new byte[fullCipher.Length - iv.Length - salt.Length];
+			using Aes aesAlg = Aes.Create();
+			byte[] iv = new byte[aesAlg.BlockSize / 8];
+			byte[] salt = new byte[16];
+			byte[] cipher = new byte[fullCipher.Length - iv.Length - salt.Length];
 
-		Array.Copy(fullCipher, iv, iv.Length);
-		Array.Copy(fullCipher, iv.Length, salt, 0, salt.Length);
-		Array.Copy(fullCipher, iv.Length + salt.Length, cipher, 0, cipher.Length);
+			Array.Copy(fullCipher, iv, iv.Length);
+			Array.Copy(fullCipher, iv.Length, salt, 0, salt.Length);
+			Array.Copy(fullCipher, iv.Length + salt.Length, cipher, 0, cipher.Length);
 
-		aesAlg.Key = DeriveKey(masterKeyBytes, salt);
-		aesAlg.IV = iv;
-		ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+			aesAlg.Key = DeriveKey(masterKeyBytes, salt);
+			aesAlg.IV = iv;
+			ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
-		using MemoryStream msDecrypt = new(cipher);
-		using CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read);
-		using StreamReader srDecrypt = new(csDecrypt);
-		return srDecrypt.ReadToEnd();
+			using MemoryStream msDecrypt = new(cipher);
+			using CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read);
+			using StreamReader srDecrypt = new(csDecrypt);
+
+			decrypted = srDecrypt.ReadToEnd();
+			return true;
+		}
+		catch (CryptographicException) {
+			decrypted = string.Empty;
+			return false;
+		}
 	}
 }

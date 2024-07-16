@@ -13,18 +13,18 @@
 </EditForm>
 
 @code {
-    private LoginModel loginModel = new();
+	private LoginModel loginModel = new();
 
-    protected override async Task OnInitializedAsync() {
-        string? masterKey = PasswordDatabase.MasterKey;
+	protected override async Task OnInitializedAsync() {
+		string? masterKey = PasswordDatabase.MasterKey;
 
-        if (string.IsNullOrEmpty(masterKey)) {
-            Navigation.NavigateTo("/login");
-        }
-    }
+		if (string.IsNullOrEmpty(masterKey)) {
+			Navigation.NavigateTo("/login");
+		}
+	}
 
-    private async Task HandleModifyKey() {
+	private async Task HandleModifyKey() {
 		await PasswordDatabase.UpdateMasterKey(loginModel.MasterKey);
 		Navigation.NavigateTo("/");
-    }
+	}
 }

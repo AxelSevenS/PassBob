@@ -1,20 +1,23 @@
-@page "/login"
+@page "/start"
 @inject NavigationManager Navigation
 
-<h3>Connexion</h3>
-<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+<h3>Création de Clé</h3>
+
+@if (masterKey is not null) {
+	<h2>
+		ATTENTION, CELA SUPPRIMERA TOUS LES MOTS DE PASSES QUE VOUS AVEZ DANS LE COFFRE-FORT
+	</h2>
+}
+
+<EditForm Model="@loginModel" OnValidSubmit="HandleSignup">
 	<DataAnnotationsValidator />
 	<ValidationSummary />
 	<div>
 		<label for="masterKey">Master Key:</label>
 		<InputText id="masterKey" @bind-Value="loginModel.MasterKey" type="password" />
 	</div>
-	<button type="submit">Se Connecter</button>
-
+	<button type="submit">Créer Master Key</button>
 </EditForm>
-<a href="/start">
-	<button>Réinitialiser les Mots de Passes</button>
-</a>
 
 @code {
 	private LoginModel loginModel = new();
@@ -22,15 +25,10 @@
 
 	protected override async Task OnInitializedAsync() {
 		masterKey = await SecureStorageService.GetEncryptedMasterKeyAsync();
-
-		if (string.IsNullOrEmpty(masterKey)) {
-			Navigation.NavigateTo("/start");
-		}
 	}
 
-	private async Task HandleLogin() {
-		if (await PasswordDatabase.TryLoginAsync(loginModel.MasterKey)) {
-			Navigation.NavigateTo("/");
-		}
+	private async void HandleSignup() {
+		await PasswordDatabase.SetMasterKeyDestructive(loginModel.MasterKey);
+		Navigation.NavigateTo("/");
 	}
 }

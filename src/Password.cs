@@ -15,9 +15,10 @@ public class Password {
 		get => _encryptedPassword;
 		set {
 			if (PasswordDatabase.MasterKeyBytes is null) return;
+			if (!EncryptionHelper.TryDecrypt(value, PasswordDatabase.MasterKeyBytes, out string decrypted)) return;
 
 			_encryptedPassword = value;
-			_decryptedPassword = EncryptionHelper.Decrypt(value, PasswordDatabase.MasterKeyBytes);
+			_decryptedPassword = decrypted;
 		}
 	}
 	private string _encryptedPassword;
@@ -25,7 +26,7 @@ public class Password {
 	[NotMapped]
 	public string DecryptedPassword {
 		get => _decryptedPassword;
-		set{
+		set {
 			if (PasswordDatabase.MasterKeyBytes is null) return;
 
 			_decryptedPassword = value;

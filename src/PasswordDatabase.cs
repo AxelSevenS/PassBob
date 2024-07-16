@@ -45,15 +45,8 @@ public class PasswordDatabase {
 		MasterKey = newMasterKey;
 
 		foreach (Password password in passwords) {
-			// // Decrypt with the old master password
-			// string decryptedPassword = EncryptionHelper.Decrypt(password.EncryptedPassword, MasterKeyBytes);
-			// Debug.WriteLine(decryptedPassword);
-
-			// // Encrypt with the new master password
-			// password.EncryptedPassword = EncryptionHelper.Encrypt(decryptedPassword, newMasterKeyBytes);
-			// Debug.WriteLine(password.EncryptedPassword);
 			// Debug.WriteLine(password.DecryptedPassword);
-			password.DecryptedPassword = password.DecryptedPassword;
+			password.DecryptedPassword = password.DecryptedPassword; // Use the Setter to encrypt
 		}
 
 
@@ -70,7 +63,10 @@ public class PasswordDatabase {
 		string? currentEncryptedKey = await SecureStorageService.GetEncryptedMasterKeyAsync();
 		if (currentEncryptedKey is null) return false;
 
-		if (key != EncryptionHelper.Decrypt(currentEncryptedKey, Encoding.UTF8.GetBytes(key))) return false;
+		if (
+			!EncryptionHelper.TryDecrypt(currentEncryptedKey, Encoding.UTF8.GetBytes(key), out string decryptedKey) ||
+			key != decryptedKey
+		) return false;
 
 		MasterKey = key;
 		return true;
