@@ -1,12 +1,15 @@
 @page "/reset"
 @inject NavigationManager Navigation
 
-<h3>Réinitialisation de la Master Key</h3>
-
 @if (masterKey is not null) {
+	<h3>Réinitialisation de la Master Key</h3>
+
 	<h2>
 		ATTENTION, CELA SUPPRIMERA TOUS LES MOTS DE PASSES QUE VOUS AVEZ DANS LE COFFRE-FORT
 	</h2>
+}
+else {
+	<h3>Création de la Master Key</h3>
 }
 
 <EditForm Model="@resetModel" OnValidSubmit="HandleResetMasterKey">
