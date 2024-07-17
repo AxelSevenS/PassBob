@@ -13,7 +13,7 @@
 	<button type="submit">Se Connecter</button>
 
 </EditForm>
-<a href="/start">
+<a href="/reset">
 	<button>Réinitialiser les Mots de Passes</button>
 </a>
 
@@ -25,13 +25,13 @@
 		masterKey = await SecureStorageService.GetEncryptedMasterKeyAsync();
 
 		if (string.IsNullOrEmpty(masterKey)) {
-			Navigation.NavigateTo("/start");
+			Navigation.NavigateTo("/reset");
 		}
 	}
 
 	private async Task HandleLogin() {
 		if (await PasswordDatabase.TryLoginAsync(loginModel.MasterKey)) {
-			Navigation.NavigateTo("/");
+			Navigation.NavigateTo("/list");
 		}
 	}
 }
