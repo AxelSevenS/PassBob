@@ -10,10 +10,13 @@ public class PasswordDatabase {
 		private set {
 			_masterKey = value;
 			MasterKeyBytes = value is null ? null : Encoding.UTF8.GetBytes(value);
+			OnMasterKeyUpdate?.Invoke(value);
 		}
 	}
 	private static string? _masterKey;
 	public static byte[]? MasterKeyBytes { get; private set; }
+
+	public static event Action<string?> OnMasterKeyUpdate;
 
 
 	private static readonly SQLiteAsyncConnection _database;

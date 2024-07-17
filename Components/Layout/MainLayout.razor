@@ -1,9 +1,11 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-	<div class="sidebar">
-		<NavMenu />
-	</div>
+	@if (masterKey is not null) {
+		<div class="sidebar">
+			<NavMenu />
+		</div>
+	}
 
 	<main>
 		<div class="top-row px-4">
@@ -14,3 +16,17 @@
 		</article>
 	</main>
 </div>
+
+@code {
+	private string? masterKey;
+
+	protected override async Task OnInitializedAsync() {
+		UpdateMasterKey(PasswordDatabase.MasterKey);
+
+		PasswordDatabase.OnMasterKeyUpdate += UpdateMasterKey;
+	}
+
+	private void UpdateMasterKey(string? key) {
+		masterKey = key;
+	}
+}
