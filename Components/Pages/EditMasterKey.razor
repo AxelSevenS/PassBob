@@ -11,6 +11,9 @@
 	</div>
 	<button type="submit">Modifier</button>
 </EditForm>
+<button @onclick="HandleLogout">
+	Se Déconnecter
+</button>
 
 @code {
 	private LoginModel editKeyModel = new();
@@ -26,5 +29,10 @@
 	private async Task HandleModifyKey() {
 		await PasswordDatabase.UpdateMasterKey(editKeyModel.MasterKey);
 		Navigation.NavigateTo("/list");
+	}
+
+	private async Task HandleLogout() {
+		await PasswordDatabase.LogoutAsync();
+		Navigation.NavigateTo("/login");
 	}
 }

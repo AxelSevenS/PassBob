@@ -73,6 +73,10 @@ public class PasswordDatabase {
 		return true;
 	}
 
+	public static async Task LogoutAsync() {
+		MasterKey = null;
+	}
+
 	public static Task<List<Password>> GetPasswordsAsync() {
 		return _database.Table<Password>().ToListAsync();
 	}
