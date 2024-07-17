@@ -25,6 +25,6 @@
 
 	private async Task HandleModifyKey() {
 		await PasswordDatabase.UpdateMasterKey(editKeyModel.MasterKey);
-		Navigation.NavigateTo("/");
+		Navigation.NavigateTo("/list");
 	}
 }
